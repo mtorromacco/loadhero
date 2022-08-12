@@ -6,8 +6,7 @@ use textplots::{Chart, Shape, Plot};
 use crate::cli::Cli;
 
 fn main() {
-    // http://localhost:5136/test
-
+    
     let cli: Cli = Cli::parse();
 
     println!("🚨 Riepilogo:\n\tNumero di richieste al secondo: {}\n\tPer i prossimi {} secondi\n\tAll'URL {}\n", cli.requests_per_second, cli.seconds, cli.url);
