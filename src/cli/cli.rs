@@ -20,7 +20,11 @@ pub struct Cli {
     /// Incremento percentuale delle richieste ad ogni secondo
     pub increment: u8,
 
-    #[clap(short, long)]
+    #[clap(short, long("header"))]
     /// Eventuali headers da aggiungere alla richiesta
-    pub headers: Vec<String>
+    pub headers: Vec<String>,
+
+    #[clap(short, long("query-string"))]
+    /// Eventuali query string da aggiungere alla richiesta
+    pub query_strings: Vec<String>
 }

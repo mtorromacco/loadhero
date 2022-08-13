@@ -35,6 +35,7 @@ fn main() {
             let result = Arc::clone(&results);
 
             let headers = cli.headers.clone();
+            let query_strings = cli.query_strings.clone();
 
             let request = thread::spawn(move || {
 
@@ -48,6 +49,12 @@ fn main() {
                     let key = header.split("=").next().unwrap();
                     let value = header.split("=").last().unwrap();
                     request_builder = request_builder.header(key, value);
+                }
+
+                for query_string in query_strings {
+                    let key = query_string.split("=").next().unwrap();
+                    let value = query_string.split("=").last().unwrap();
+                    request_builder = request_builder.query(&[(key, value)]);
                 }
 
                 let resp = request_builder.send();
