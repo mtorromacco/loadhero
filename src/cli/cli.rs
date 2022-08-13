@@ -17,5 +17,10 @@ pub struct Cli {
     pub seconds: u32,
 
     #[clap(short, long, default_value = "0")]
-    pub increment: u8
+    /// Incremento percentuale delle richieste ad ogni secondo
+    pub increment: u8,
+
+    #[clap(short, long)]
+    /// Eventuali headers da aggiungere alla richiesta
+    pub headers: Vec<String>
 }

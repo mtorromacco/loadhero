@@ -34,10 +34,24 @@ fn main() {
             let url: String = cli.url.clone();
             let result = Arc::clone(&results);
 
+            let headers = cli.headers.clone();
+
             let request = thread::spawn(move || {
 
                 let request_time: Instant = Instant::now();
-                let resp = reqwest::blocking::get(url);
+                //let resp = reqwest::blocking::get(url);
+
+                let client = reqwest::blocking::Client::new();
+                let mut request_builder = client.get(url);
+
+                for header in headers {
+                    let key = header.split("=").next().unwrap();
+                    let value = header.split("=").last().unwrap();
+                    request_builder = request_builder.header(key, value);
+                }
+
+                let resp = request_builder.send();
+
                 let time = request_time.elapsed().as_millis();
                 
                 match resp {
@@ -129,7 +143,7 @@ fn main() {
     println!("🚀 Richiesta più veloce: {} ms", min_time);
     println!("\n");
 
-    Chart::new(200, 55, 0 as f32, points.len() as f32)
+    Chart::new(200, 55, 0 as f32, (points.len() - 1) as f32)
         .lineplot(&Shape::Steps(&points))
         .display();
 
