@@ -14,5 +14,8 @@ pub struct Cli {
 
     #[clap(short, long, forbid_empty_values = true, default_value = "60")]
     /// Secondi di esecuzione
-    pub seconds: u32
+    pub seconds: u32,
+
+    #[clap(short, long, default_value = "0")]
+    pub increment: u8
 }

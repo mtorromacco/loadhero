@@ -9,6 +9,10 @@ fn main() {
 
     let cli: Cli = Cli::parse();
 
+    if cli.increment > 100 {
+        panic!("Incremento non valido");
+    }
+
     println!("🚨 Riepilogo:\n\tNumero di richieste al secondo: {}\n\tPer i prossimi {} secondi\n\tAll'URL {}\n", cli.requests_per_second, cli.seconds, cli.url);
 
     let mut requests: Vec<JoinHandle<()>> = vec![];
