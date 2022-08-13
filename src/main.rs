@@ -1,17 +1,15 @@
 mod cli;
+mod models;
 
 use std::{thread::{self, JoinHandle}, time::{Duration, Instant}, collections::HashMap, sync::{Arc, Mutex}};
 use clap::Parser;
 use textplots::{Chart, Shape, Plot};
-use crate::cli::Cli;
+use cli::Cli;
+use models::ResponseInfo;
 
 fn main() {
 
     let mut cli: Cli = Cli::parse();
-
-    if cli.increment > 100 {
-        panic!("Incremento non valido");
-    }
 
     println!("🚨 Riepilogo:\n\tNumero di richieste al secondo: {}\n\tPer i prossimi {} secondi\n\tAll'URL {}\n", cli.requests_per_second, cli.seconds, cli.url);
 
@@ -152,19 +150,5 @@ fn main() {
     Chart::new(200, 55, 0 as f32, (points.len() - 1) as f32)
         .lineplot(&Shape::Steps(&points))
         .display();
-
-}
-
-
-struct ResponseInfo {
-    status: u16,
-    time: u128
-}
-
-impl ResponseInfo {
-
-    fn new(status: u16, time: u128) -> ResponseInfo {
-        ResponseInfo { status, time }
-    }
 
 }
