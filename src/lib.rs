@@ -41,7 +41,7 @@ pub fn run(seconds: u32, requests_per_second: u32, increment: u8, url: String, h
         println!("\tStatus code: {} → {}", status_code.0, status_code.1);
     }
 
-    println!("🕛 Tempo medio: {} ms", stats_info.average_time / successful_requests_number as u128);
+    println!("🕛 Tempo medio: {} ms", stats_info.total_time / successful_requests_number as u128);
     println!("🐌 Richiesta più lenta: {} ms", stats_info.max_time);
     println!("🚀 Richiesta più veloce: {} ms", stats_info.min_time);
     println!("\n");
@@ -138,7 +138,17 @@ fn execute_request(url: String, headers: Vec<String>, query_strings: Vec<String>
 /// Ritorna uno StatsInfo contenente tempo medio di esecuzione, tempo minimo, tempo massimo, status codes e relativa conta e coordinate per il grafico finale
 fn calc_stats(successful_requests: &Vec<ResponseInfo>) -> StatsInfo {
 
-    let mut average_time: u128 = 0;
+    if successful_requests.len() == 0 {
+        return StatsInfo {
+            total_time: 0,
+            max_time: 0,
+            min_time: 0,
+            status_codes: HashMap::new(),
+            points: vec![]
+        };
+    }
+
+    let mut total_time: u128 = 0;
     let mut min_time: u128 = 10000;
     let mut max_time: u128 = 0;
     let mut status_codes: HashMap<u16, u32> = HashMap::new();
@@ -147,7 +157,7 @@ fn calc_stats(successful_requests: &Vec<ResponseInfo>) -> StatsInfo {
     let mut index: f32 = 1.0;
 
     for request in successful_requests {
-        average_time += request.time;
+        total_time += request.time;
         
         match status_codes.get_mut(&request.status) {
             Some(value) => {
@@ -173,11 +183,94 @@ fn calc_stats(successful_requests: &Vec<ResponseInfo>) -> StatsInfo {
     }
 
     StatsInfo { 
-        average_time, 
+        total_time, 
         min_time, 
         max_time, 
         status_codes, 
         points 
     }
 
+}
+
+
+#[cfg(test)]
+mod calc_stats_tests {
+    use super::*;
+
+
+    #[test]
+    fn empty_vector() {
+
+        let input: Vec<ResponseInfo> = vec![];
+
+        let response: StatsInfo = calc_stats(&input);
+
+        assert_eq!(0, response.total_time);
+        assert_eq!(0, response.max_time);
+        assert_eq!(0, response.min_time);
+        assert_eq!(0, response.status_codes.len());
+        assert_eq!(0, response.points.len());
+    }
+
+
+    #[test]
+    fn vector_with_single_value() {
+
+        let input: Vec<ResponseInfo> = vec![
+            ResponseInfo {
+                status: 200,
+                time: 50
+            }
+        ];
+
+        let response: StatsInfo = calc_stats(&input);
+
+        assert_eq!(50, response.total_time);
+        assert_eq!(50, response.max_time);
+        assert_eq!(50, response.min_time);
+
+        assert_eq!(1, response.status_codes.len());
+        assert_eq!((&200, &1), response.status_codes.iter().next().unwrap());
+
+        assert_eq!(2, response.points.len());
+        assert_eq!(&(0.0, 0.0), response.points.iter().next().unwrap());
+        assert_eq!(&(1.0, 50.0), response.points.iter().last().unwrap());
+    }
+
+
+    #[test]
+    fn vector_with_multiple_values() {
+
+        let input: Vec<ResponseInfo> = vec![
+            ResponseInfo {
+                status: 200,
+                time: 25
+            },
+            ResponseInfo {
+                status: 400,
+                time: 50
+            },
+            ResponseInfo {
+                status: 200,
+                time: 75
+            }
+        ];
+
+        let response: StatsInfo = calc_stats(&input);
+
+        assert_eq!(150, response.total_time);
+        assert_eq!(75, response.max_time);
+        assert_eq!(25, response.min_time);
+        
+        assert_eq!(2, response.status_codes.len());
+        assert_eq!(&2, response.status_codes.iter().filter(|status_code| status_code.0 == &200).next().unwrap().1);
+        assert_eq!(&1, response.status_codes.iter().filter(|status_code| status_code.0 == &400).next().unwrap().1);
+
+        assert_eq!(4, response.points.len());
+        assert_eq!(&(0.0, 0.0), response.points.iter().next().unwrap());
+        assert_eq!(&(1.0, 25.0), response.points.iter().nth(1).unwrap());
+        assert_eq!(&(2.0, 50.0), response.points.iter().nth(2).unwrap());
+        assert_eq!(&(3.0, 75.0), response.points.iter().last().unwrap());
+
+    }
 }
