@@ -9,3 +9,4 @@ edition = "2021"
 reqwest = { version = "0.11.11", features = ["blocking"] }
 clap = { version = "3.2.17", features = ["derive"] }
 textplots = "0.8.0"
+mockito = "0.31.0"
