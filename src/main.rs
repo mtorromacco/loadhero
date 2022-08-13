@@ -7,7 +7,7 @@ use crate::cli::Cli;
 
 fn main() {
 
-    let cli: Cli = Cli::parse();
+    let mut cli: Cli = Cli::parse();
 
     if cli.increment > 100 {
         panic!("Incremento non valido");
@@ -21,7 +21,13 @@ fn main() {
 
     let started_time = Instant:: now();
 
+    let mut sended_requests: u32 = 0;
+
     for second in 0..cli.seconds {
+
+        if second > 0 {
+            cli.requests_per_second = (cli.requests_per_second as f32 * (1.0 + (cli.increment as f32 / 100.0) as f32)).ceil() as u32;
+        }
 
         for _ in 0..cli.requests_per_second {
 
@@ -33,7 +39,7 @@ fn main() {
                 let request_time: Instant = Instant::now();
                 let resp = reqwest::blocking::get(url);
                 let time = request_time.elapsed().as_millis();
-
+                
                 match resp {
                     Ok(res) => {
                         let response_info = ResponseInfo::new(res.status().as_u16(), time);
@@ -44,11 +50,13 @@ fn main() {
 
             });
 
+            sended_requests += 1;
+
             requests.push(request);
 
         }
 
-        println!("✈️ Inviate {} richieste", cli.requests_per_second * (second + 1));
+        println!("✈️ Inviate {} richieste", sended_requests);
         thread::sleep(Duration::from_secs(1));
     }    
 
@@ -67,7 +75,7 @@ fn main() {
     println!();
 
     println!("📃 REPORT FINALE");
-    println!("🔥 Richieste completate: {}", results.lock().unwrap().len());
+    println!("🔥 Richieste completate con successo: {}/{}", results.lock().unwrap().len(), sended_requests);
 
     println!("🕛 Tempo totale: {} s", started_time.elapsed().as_secs_f32());
 
