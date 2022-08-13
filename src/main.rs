@@ -6,7 +6,7 @@ use textplots::{Chart, Shape, Plot};
 use crate::cli::Cli;
 
 fn main() {
-    
+
     let cli: Cli = Cli::parse();
 
     println!("🚨 Riepilogo:\n\tNumero di richieste al secondo: {}\n\tPer i prossimi {} secondi\n\tAll'URL {}\n", cli.requests_per_second, cli.seconds, cli.url);
@@ -44,7 +44,7 @@ fn main() {
 
         }
 
-        println!("✈️  Inviate {} richieste", cli.requests_per_second * (second + 1));
+        println!("✈️ Inviate {} richieste", cli.requests_per_second * (second + 1));
         thread::sleep(Duration::from_secs(1));
     }    
 
