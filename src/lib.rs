@@ -111,12 +111,22 @@ fn execute_request(url: String, headers: Vec<String>, query_strings: Vec<String>
     let mut request_builder: RequestBuilder = client.get(url);
 
     for header in headers {
+
+        if !header.contains("=") {
+            panic!("Header non valido, separatore chiave-valore '=' mancante");
+        }
+
         let key: &str = header.split("=").next().unwrap();
         let value: &str = header.split("=").last().unwrap();
         request_builder = request_builder.header(key, value);
     }
 
     for query_string in query_strings {
+
+        if !query_string.contains("=") {
+            panic!("Query string non valida, separatore chiave-valore '=' mancante");
+        }
+
         let key: &str = query_string.split("=").next().unwrap();
         let value: &str = query_string.split("=").last().unwrap();
         request_builder = request_builder.query(&[(key, value)]);
@@ -191,6 +201,7 @@ fn calc_stats(successful_requests: &Vec<ResponseInfo>) -> StatsInfo {
     }
 
 }
+
 
 
 #[cfg(test)]
@@ -273,4 +284,193 @@ mod calc_stats_tests {
         assert_eq!(&(3.0, 75.0), response.points.iter().last().unwrap());
 
     }
+}
+
+
+
+#[cfg(test)]
+mod execute_request_tests {
+    use super::*;
+    use mockito::{self, mock, Mock, Matcher};
+
+
+    #[test]
+    fn wrong_url() {
+
+        let url: String = format!("{}/wrong", mockito::server_url());
+
+        let mock: Mock = mock("GET", "/test")
+            .expect(0)
+            .create();
+
+        let result: Result<ResponseInfo, reqwest::Error> = execute_request(url, vec![], vec![]);
+
+        let result = match result {
+            Ok(res) => res,
+            Err(_) => panic!("Error in request execution")
+        };
+
+        assert_eq!(501, result.status);
+        mock.assert();
+    }
+
+
+    #[test]
+    fn no_headers_and_query_strings() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(200)
+            .expect(1)
+            .create();
+
+        let result: Result<ResponseInfo, reqwest::Error> = execute_request(url, vec![], vec![]);
+
+        let result = match result {
+            Ok(res) => res,
+            Err(_) => panic!("Error in request execution")
+        };
+
+        assert_eq!(200, result.status);
+        mock.assert();
+    }
+
+
+    #[test]
+    fn with_headers() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+        let headers: Vec<String> = vec![
+            String::from("header_key_1=header_value_1"),
+            String::from("header_key_2=header_value_2")
+        ];
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(200)
+            .match_header("header_key_1", "header_value_1")
+            .match_header("header_key_2", "header_value_2")
+            .expect(1)
+            .create();
+
+        let result: Result<ResponseInfo, reqwest::Error> = execute_request(url, headers, vec![]);
+
+        let result = match result {
+            Ok(res) => res,
+            Err(_) => panic!("Error in request execution")
+        };
+
+        assert_eq!(200, result.status);
+        mock.assert();
+        mock.matched();
+    }
+
+
+    #[test]
+    fn with_query_strings() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+        let query_strings: Vec<String> = vec![
+            String::from("query_string_key_1=query_string_value_1"),
+            String::from("query_string_key_2=query_string_value_2")
+        ];
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(200)
+            .match_query(Matcher::UrlEncoded(String::from("query_string_key_1"), String::from("query_string_value_1")))
+            .match_query(Matcher::UrlEncoded(String::from("query_string_key_2"), String::from("query_string_value_2")))
+            .expect(1)
+            .create();
+
+        let result: Result<ResponseInfo, reqwest::Error> = execute_request(url, vec![], query_strings);
+
+        let result = match result {
+            Ok(res) => res,
+            Err(_) => panic!("Error in request execution")
+        };
+
+        assert_eq!(200, result.status);
+        mock.assert();
+        mock.matched();
+    }
+
+
+    #[test]
+    fn with_headers_and_query_string() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+        let headers: Vec<String> = vec![
+            String::from("header_key_1=header_value_1"),
+            String::from("header_key_2=header_value_2")
+        ];
+        let query_strings: Vec<String> = vec![
+            String::from("query_string_key_1=query_string_value_1"),
+            String::from("query_string_key_2=query_string_value_2")
+        ];
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(200)
+            .match_header("header_key_1", "header_value_1")
+            .match_header("header_key_2", "header_value_2")
+            .match_query(Matcher::UrlEncoded(String::from("query_string_key_1"), String::from("query_string_value_1")))
+            .match_query(Matcher::UrlEncoded(String::from("query_string_key_2"), String::from("query_string_value_2")))
+            .expect(1)
+            .create();
+
+        let result: Result<ResponseInfo, reqwest::Error> = execute_request(url, headers, query_strings);
+
+        let result = match result {
+            Ok(res) => res,
+            Err(_) => panic!("Error in request execution")
+        };
+
+        assert_eq!(200, result.status);
+        mock.assert();
+        mock.matched();
+    }
+
+
+    #[test]
+    fn response_400() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(400)
+            .expect(1)
+            .create();
+
+        let result: Result<ResponseInfo, reqwest::Error> = execute_request(url, vec![], vec![]);
+
+        let result = match result {
+            Ok(res) => res,
+            Err(_) => panic!("Error in request execution")
+        };
+
+        assert_eq!(400, result.status);
+        mock.assert();
+    }
+
+
+    #[test]
+    fn response_500() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(500)
+            .expect(1)
+            .create();
+
+        let result: Result<ResponseInfo, reqwest::Error> = execute_request(url, vec![], vec![]);
+
+        let result = match result {
+            Ok(res) => res,
+            Err(_) => panic!("Error in request execution")
+        };
+
+        assert_eq!(500, result.status);
+        mock.assert();
+    }
+
 }
