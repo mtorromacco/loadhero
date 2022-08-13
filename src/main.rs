@@ -69,13 +69,18 @@ fn main() {
     println!();
 
     println!("============================================================");
-    println!("        🎉 TEST DI CARICO COMPLETATO CON SUCCESSO 🎉        ");
+    println!("              🎉 TEST DI CARICO COMPLETATO 🎉              ");
     println!("============================================================");
 
     println!();
 
     println!("📃 REPORT FINALE");
     println!("🔥 Richieste completate con successo: {}/{}", results.lock().unwrap().len(), sended_requests);
+
+    if results.lock().unwrap().len() == 0 {
+        println!("\n❌ Nessuna richiesta completata con successo! Controlla che l'applicazione sia online");
+        return;
+    }
 
     println!("🕛 Tempo totale: {} s", started_time.elapsed().as_secs_f32());
 
