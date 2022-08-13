@@ -40,7 +40,6 @@ fn main() {
             let request = thread::spawn(move || {
 
                 let request_time: Instant = Instant::now();
-                //let resp = reqwest::blocking::get(url);
 
                 let client = reqwest::blocking::Client::new();
                 let mut request_builder = client.get(url);
