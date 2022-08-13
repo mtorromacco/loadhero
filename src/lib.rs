@@ -13,7 +13,7 @@ pub fn run(seconds: u32, requests_per_second: u32, increment: u8, url: String, h
     
     println!("🚨 Riepilogo:\n\tNumero di richieste al secondo: {}\n\tPer i prossimi {} secondi\n\tAll'URL {}\n", requests_per_second, seconds, url);
 
-    let now: Instant = Instant:: now();
+    let now: Instant = Instant::now();
 
     let (successful_requests, sended_requests) = send_requests(seconds, requests_per_second, increment, url, headers, query_strings);
 
