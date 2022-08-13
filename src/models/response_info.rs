@@ -1,3 +1,4 @@
+#[derive(Clone, Copy)]
 pub struct ResponseInfo {
     pub status: u16,
     pub time: u128
