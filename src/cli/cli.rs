@@ -5,7 +5,7 @@ use clap::Parser;
 pub struct Cli {
 
     #[clap(forbid_empty_values = true)]
-    /// Current platform
+    /// URL endpoint assoluto
     pub url: String,
 
     #[clap(short, long, forbid_empty_values = true, default_value = "10")]
