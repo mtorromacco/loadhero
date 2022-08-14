@@ -91,7 +91,7 @@ All'avvio verranno visualizzate lee informazioni del test di carico.
 
 <div align="center">
   <a href="https://github.com/mtorromacco/loadhero">
-    <img src="recap.png" alt="Recap" width="80" height="80">
+    <img src="recap.png" alt="Recap">
   </a>
 </div>
 
@@ -99,7 +99,7 @@ Al termine dell'esecuzione verrà invece visualizzato un report conclusivo.
 
 <div align="center">
   <a href="https://github.com/mtorromacco/loadhero">
-    <img src="report.png" alt="Report" width="80" height="80">
+    <img src="report.png" alt="Report">
   </a>
 </div>
 
