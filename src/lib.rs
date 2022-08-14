@@ -57,6 +57,10 @@ pub fn run(seconds: u32, requests_per_second: u32, increment: u8, url: String, h
 /// Funzione che si preoccupa di gestire le richieste nel tempo prefissato creando un nuovo thread logico per ogni richiesta e ritornando alla fine la lista di risposte andate a buon fine ottenute con il numero di richieste effettivamente inviate
 fn send_requests(seconds: u32, mut requests_per_second: u32, increment: u8, url: String, headers: Vec<String>, query_strings: Vec<String>) -> (Vec<ResponseInfo>, u32) {
 
+    if seconds == 0 || requests_per_second == 0 {
+        panic!("Valori delle richieste per secondo e/o tempo di esecuzione non validi");
+    }
+
     let results: Arc<Mutex<Vec<ResponseInfo>>> = Arc::new(Mutex::new(vec![]));
     let mut requests: Vec<JoinHandle<()>> = vec![];
     let mut sended_requests: u32 = 0;
@@ -102,6 +106,7 @@ fn send_requests(seconds: u32, mut requests_per_second: u32, increment: u8, url:
 
     (results, sended_requests)
 }
+
 
 
 /// Funzione per eseguire effettivamente la richiesta HTTP, compone la richiesta impostando gli eventuali headers, query strings e l'URL e calcolando il tempo di esecuzione
@@ -473,4 +478,63 @@ mod execute_request_tests {
         mock.assert();
     }
 
+}
+
+
+
+#[cfg(test)]
+mod send_requests_tests {
+    use mockito::{Mock, mock};
+
+    use super::*;
+
+
+    #[test]
+    #[should_panic(expected = "Valori delle richieste per secondo e/o tempo di esecuzione non validi")]
+    fn seconds_0() {
+        send_requests(0, 3, 0, String::from(""), vec![], vec![]);
+    }
+
+
+    #[test]
+    #[should_panic(expected = "Valori delle richieste per secondo e/o tempo di esecuzione non validi")]
+    fn requests_per_second_0() {
+        send_requests(3, 0, 0, String::from(""), vec![], vec![]);
+    }
+
+
+    #[test]
+    fn correct() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(200)
+            .expect(9)
+            .create();
+
+        let (info, requests_number) = send_requests(3, 3, 0, url, vec![], vec![]);
+        
+        mock.assert();
+        assert_eq!(9, info.iter().filter(|i| i.status == 200).count());
+        assert_eq!(9, requests_number);
+    }
+
+
+    #[test]
+    fn with_increment() {
+
+        let url: String = format!("{}/test", mockito::server_url());
+
+        let mock: Mock = mock("GET", "/test")
+            .with_status(200)
+            .expect(12)
+            .create();
+
+        let (info, requests_number) = send_requests(3, 3, 1, url, vec![], vec![]);
+        
+        mock.assert();
+        assert_eq!(12, info.iter().filter(|i| i.status == 200).count());
+        assert_eq!(12, requests_number);
+    }
 }
