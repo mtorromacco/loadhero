@@ -21,10 +21,10 @@ pub struct Cli {
     pub increment: u8,
 
     #[clap(short, long("header"))]
-    /// Eventuali headers da aggiungere alla richiesta
+    /// Headers da aggiungere alla richiesta (separatore chiave-valore '=')
     pub headers: Vec<String>,
 
     #[clap(short, long("query-string"))]
-    /// Eventuali query string da aggiungere alla richiesta
+    /// Query string da aggiungere alla richiesta (separatore chiave-valore '=')
     pub query_strings: Vec<String>
 }

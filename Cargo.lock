@@ -473,7 +473,7 @@ checksum = "04c3b4822ccebfa39c02fc03d1534441b22ead323fa0f48bb7ddd8e6ba076a40"
 
 [[package]]
 name = "loadhero"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "clap 3.2.17",
  "mockito",
