@@ -13,7 +13,7 @@
   <h3 align="center">loadhero</h3>
 
   <p align="center">
-    Applicazione per eseguire test di carico
+    Applicazione CLI per eseguire test di carico
     <br />
     ·
     <a href="https://github.com/mtorromacco/loadhero/issues">Segnala Bug</a>
